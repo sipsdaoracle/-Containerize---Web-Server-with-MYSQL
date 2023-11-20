@@ -1,0 +1,150 @@
+version: '3.8'
+networks:
+  monitor-net:
+    driver: bridge
+
+services:
+ web:
+    build: 
+        context: .
+        dockerfile: Dockerfile 
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+       - .:/var/www/html/
+    ports:
+      - "8031:80"
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "phpstack"
+
+ db:
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    env_file:
+      - .env
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 3366:3306
+    volumes:
+      - db:/var/lib/mysql  
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "phpstack"
+
+ phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - '89:80'
+    restart: always
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
+    networks:
+     - monitor-net
+
+    labels:
+      org.label-schema.group: "phpstack"
+
+volumes:
+    db:
+  
+  
+
+# volumes:
+#  db_data:
+# grafana_data:
+
+# secrets:
+#   db_root_password:
+#     file: db_root_password.txt
+#   db_name:
+#     file: db_name.txt
+#   db_user:
+#     file: db_user.txt
+#   db_password:
+#     file: db_password.txt
+
+# volumes:
+#   db_data:
+#   grafana_data:
+
+
+# services:
+#   web:
+#     build: .
+#     depends_on:
+#       - db
+#     env_file:
+#       - ./web.env
+#     ports:
+#       - "8030:80"
+#     volumes:
+#       - ./app:/var/www/html
+#     networks:
+#       - monitor-net
+#     labels:
+#       org.label-schema.group: "phpstack"
+
+#   db:
+#     image: mysql/mysql-server:8.0   
+#     command: --default-authentication-plugin=mysql_native_password
+#     restart: always
+#     # env_file:
+#       # - db.env
+#     environment:
+#       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+#       MYSQL_DATABASE_FILE: /run/secrets/db_name
+#       MYSQL_USER_FILE: /run/secrets/db_user
+#       MYSQL_PASSWORD_FILE: /run/secrets/db_password
+#     secrets:
+#       - db_root_password
+#       - db_name
+#       - db_user
+#       - db_password
+#     ports:
+#       - "3303:3306"   
+#     volumes:
+#       - db_data:/var/lib/mysql
+#     networks:
+#       - monitor-net
+#     labels:
+#       org.label-schema.group: "phpstack"
+
+#   phpmyadmin:
+#     image: phpmyadmin:latest 
+#     ports:
+#       - '8060:80'
+#     environment:
+#       PMA_HOST: db
+#     depends_on:
+#       - db
+#     networks:
+#       - monitor-net
+#     labels:
+#       org.label-schema.group: "phpstack"
+
+# secrets:
+#   db_root_password:
+#     file: db_root_password.txt
+#   db_name:
+#     file: db_name.txt
+#   db_user:
+#     file: db_user.txt
+#   db_password:
+#     file: db_password.txt
+
+# volumes:
+#   db_data:
+#   grafana_data:
